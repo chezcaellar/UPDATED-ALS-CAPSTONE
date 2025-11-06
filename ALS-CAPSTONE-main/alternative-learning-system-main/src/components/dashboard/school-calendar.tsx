@@ -34,6 +34,7 @@ export function SchoolCalendar() {
   const [description, setDescription] = useState('');
   const [type, setType] = useState<EventType>('lesson');
   const [status, setStatus] = useState<EventStatus>('upcoming');
+  const [isDatePinned, setIsDatePinned] = useState(false);
 
   // Helper function to create date string without timezone issues
   const createDateString = (year: number, month: number, day: number): string => {
@@ -155,7 +156,9 @@ export function SchoolCalendar() {
   // Prefill date when user clicks a day
   const handleDayClick = (dateString: string) => {
     if (!dateString) return;
-    startCreateFlow(dateString);
+    setHoveredDate(dateString);
+    setPendingDate(null);
+    setIsDatePinned(true);
   };
 
   const resetForm = () => {
@@ -292,10 +295,10 @@ export function SchoolCalendar() {
   // Handle mouse leave for tooltip with improved logic
   const handleMouseLeave = () => {
     // Only start hide timer if user is not hovering the tooltip
-    if (!isTooltipHovered) {
+    if (!isTooltipHovered && !isDatePinned) {
       clearAllTimeouts();
       const timeout = setTimeout(() => {
-        if (!isTooltipHovered) { // Double-check before hiding
+        if (!isTooltipHovered && !isDatePinned) { // Double-check before hiding
           setHoveredDate(null);
           setPendingDate(null);
         }
@@ -316,14 +319,35 @@ export function SchoolCalendar() {
     }
   };
 
+  // Close pinned date view when clicking outside the calendar and tooltip
+  useEffect(() => {
+    if (!isDatePinned) return;
+    const handleDocumentClick = (e: any) => {
+      const calendarEl = document.querySelector('.calendar-container');
+      const tooltipEl = document.querySelector('.calendar-tooltip');
+      if (
+        calendarEl && !calendarEl.contains(e.target) &&
+        tooltipEl && !tooltipEl.contains(e.target)
+      ) {
+        setIsDatePinned(false);
+        setHoveredDate(null);
+        setPendingDate(null);
+      }
+    };
+    document.addEventListener('mousedown', handleDocumentClick);
+    return () => document.removeEventListener('mousedown', handleDocumentClick);
+  }, [isDatePinned]);
+
   // Handle tooltip mouse leave (hide tooltip)
   const handleTooltipMouseLeave = () => {
     setIsTooltipHovered(false);
+    if (isDatePinned) return; // Keep open if pinned
     clearAllTimeouts();
-
     const timeout = setTimeout(() => {
-      setHoveredDate(null);
-      setPendingDate(null);
+      if (!isDatePinned) {
+        setHoveredDate(null);
+        setPendingDate(null);
+      }
     }, 100); // Quick hide when leaving tooltip
     setHideTimeout(timeout);
   };
@@ -486,10 +510,19 @@ export function SchoolCalendar() {
         >
           <div className="bg-white dark:bg-slate-800 border-4 border-green-500 dark:border-green-400 rounded-lg shadow-xl p-4 max-w-sm">
             {/* Tooltip Header */}
-            <div className="bg-green-500 dark:bg-green-600 text-white px-3 py-2 rounded-t-md -mx-4 -mt-4 mb-3">
+            <div className="bg-green-500 dark:bg-green-600 text-white px-3 py-2 rounded-t-md -mx-4 -mt-4 mb-3 flex items-center justify-between">
               <h3 className="font-bold text-sm">
                 {formatDateForPHT(hoveredDate)}
               </h3>
+              <div className="flex items-center gap-2">
+                {isDatePinned && (
+                  <span className="text-[10px] bg-green-700/60 px-2 py-0.5 rounded">Pinned</span>
+                )}
+                <Button size="sm" variant="secondary" className="h-7 px-2"
+                  onClick={() => { setIsDatePinned(false); setHoveredDate(null); setPendingDate(null); }}>
+                  Close
+                </Button>
+              </div>
             </div>
 
             {/* Events List */}

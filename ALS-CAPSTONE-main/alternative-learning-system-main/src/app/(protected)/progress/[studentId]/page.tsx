@@ -636,9 +636,16 @@ function StudentActivitySummaryPageContent() {
 
         {/* Modules Section */}
         <div className="p-6">
-          <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
-            Modules
-          </h3>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+              Modules
+            </h3>
+            {student && (
+              <div className="text-sm text-gray-700 dark:text-gray-300">
+                Selected Student: <span className="font-semibold text-gray-900 dark:text-white">{student.name}</span> <span className="text-gray-500">({student.lrn})</span>
+              </div>
+            )}
+          </div>
 
           {/* Module Tabs */}
           {availableModules.length > 0 ? (
@@ -649,8 +656,8 @@ function StudentActivitySummaryPageContent() {
             >
               <div className="border-b border-gray-300 dark:border-gray-600">
                 {/* Horizontal scroll container for mobile */}
-                <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-gray-100 dark:scrollbar-track-gray-800">
-                  <TabsList className="w-full !bg-transparent rounded-none gap-0 p-0 justify-start">
+                <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-gray-100 dark:scrollbar-track-gray-800 px-1">
+                  <TabsList className="w-full !bg-transparent rounded-none gap-2 p-0 justify-start">
                     {availableModules.map((module) => (
                       <TabsTrigger
                         key={module._id}
@@ -695,7 +702,7 @@ function StudentActivitySummaryPageContent() {
                       />
                     )}
                   </div>
-                </TabsContent>
+                </TabsContent)
               ))}
             </Tabs>
           ) : (
