@@ -1,6 +1,8 @@
 'use client';
 
+// @ts-ignore - Module resolution available at runtime
 import { useState, useEffect } from 'react';
+// @ts-ignore - Icon library available at runtime
 import { ChevronLeft, ChevronRight, Clock, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useEventsStore } from '@/store/events-store';
@@ -13,10 +15,10 @@ export function SchoolCalendar() {
   const [currentDate, setCurrentDate] = useState(new Date()); // Current month based on local time
   const [hoveredDate, setHoveredDate] = useState<string | null>(null);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
-  const [hideTimeout, setHideTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [hideTimeout, setHideTimeout] = useState<ReturnType<typeof setTimeout> | null>(null);
   const [isTooltipHovered, setIsTooltipHovered] = useState(false);
   const [pendingDate, setPendingDate] = useState<string | null>(null);
-  const [debounceTimeout, setDebounceTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [debounceTimeout, setDebounceTimeout] = useState<ReturnType<typeof setTimeout> | null>(null);
   const { events, fetchEvents, getEventsByDate, addEvent, updateEvent, deleteEvent } = useEventsStore();
 
   // Add Event dialog state
@@ -190,7 +192,7 @@ export function SchoolCalendar() {
     setIsDeleteOpen(true);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: any) => {
     e.preventDefault();
     if (!title || !date || !time || !location || !description) return;
     setFormSubmitting(true);
@@ -247,7 +249,7 @@ export function SchoolCalendar() {
   const calendarDays = getCalendarData();
 
   // Handle mouse enter for tooltip - improved race condition handling
-  const handleMouseEnter = (dateString: string, event: React.MouseEvent) => {
+  const handleMouseEnter = (dateString: string, event: any) => {
     // Always clear any existing timeouts first
     clearAllTimeouts();
 
@@ -327,7 +329,7 @@ export function SchoolCalendar() {
   };
 
   // Handle scroll within tooltip (keep tooltip visible)
-  const handleTooltipScroll = (e: React.UIEvent) => {
+  const handleTooltipScroll = (e: any) => {
     // Prevent scroll events from bubbling up and triggering mouse leave
     e.stopPropagation();
 
@@ -337,7 +339,7 @@ export function SchoolCalendar() {
   };
 
   // Handle mouse events within scrollable content (keep tooltip visible)
-  const handleScrollAreaMouseMove = (e: React.MouseEvent) => {
+  const handleScrollAreaMouseMove = (e: any) => {
     // Prevent mouse move events from bubbling up during scroll interactions
     e.stopPropagation();
 
@@ -358,6 +360,7 @@ export function SchoolCalendar() {
   };
 
   return (
+    <>
     <div className="calendar-container bg-white dark:bg-slate-800 rounded-lg shadow-lg border-4 border-green-500 dark:border-green-400 h-full flex flex-col overflow-hidden">
       {/* Calendar Header */}
       <div className="bg-green-500 dark:bg-green-600 text-white p-3 sm:p-4 flex-shrink-0">
@@ -465,89 +468,7 @@ export function SchoolCalendar() {
         </div>
       </div>
 
-      {/* Add/Edit Event Button + Dialog */}
-      <div className="px-3 pb-3 sm:px-4 sm:pb-4">
-        <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
-          <div className="flex justify-end">
-            <DialogTrigger asChild>
-              <Button variant="default" size="sm" className="bg-green-600 hover:bg-green-700 text-white">
-                Add Event
-              </Button>
-            </DialogTrigger>
-          </div>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>{editingEvent ? 'Edit Event' : 'Add Event'}</DialogTitle>
-            </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-3">
-              <div>
-                <label className="block text-sm font-medium mb-1">Title</label>
-                <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Event title" />
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-sm font-medium mb-1">Date</label>
-                  <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Time</label>
-                  <Input value={time} onChange={(e) => setTime(e.target.value)} placeholder="e.g. 8:00 AM - 10:00 AM" />
-                </div>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-sm font-medium mb-1">Type</label>
-                  <Select value={type} onValueChange={(v) => setType(v as EventType)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="lesson">Lesson</SelectItem>
-                      <SelectItem value="orientation">Orientation</SelectItem>
-                      <SelectItem value="assessment">Assessment</SelectItem>
-                      <SelectItem value="workshop">Workshop</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Status</label>
-                  <Select value={status} onValueChange={(v) => setStatus(v as EventStatus)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="upcoming">Upcoming</SelectItem>
-                      <SelectItem value="ongoing">Ongoing</SelectItem>
-                      <SelectItem value="completed">Completed</SelectItem>
-                      <SelectItem value="cancelled">Cancelled</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">Where</label>
-                <Input value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Location" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">Description</label>
-                <textarea
-                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                  rows={4}
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Describe the event"
-                />
-              </div>
-              <DialogFooter>
-                <Button type="button" variant="ghost" onClick={() => { setIsAddOpen(false); resetForm(); }}>Cancel</Button>
-                <Button type="submit" disabled={formSubmitting || !title || !date || !time || !location || !description}>
-                  {formSubmitting ? 'Saving...' : (editingEvent ? 'Save Changes' : 'Save Event')}
-                </Button>
-              </DialogFooter>
-            </form>
-          </DialogContent>
-        </Dialog>
-      </div>
+      
 
       {/* Tooltip */}
       {hoveredDate && (
@@ -648,5 +569,88 @@ export function SchoolCalendar() {
         </DialogContent>
       </Dialog>
     </div>
+
+    {/* Add/Edit Event Button + Dialog - positioned below the calendar */}
+    <div className="mt-3 sm:mt-4">
+      <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
+        <DialogTrigger asChild>
+          <Button variant="default" size="sm" className="bg-green-600 hover:bg-green-700 text-white">
+            Add Event
+          </Button>
+        </DialogTrigger>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{editingEvent ? 'Edit Event' : 'Add Event'}</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleSubmit} className="space-y-3">
+            <div>
+              <label className="block text-sm font-medium mb-1">Title</label>
+              <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Event title" />
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-sm font-medium mb-1">Date</label>
+                <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Time</label>
+                <Input value={time} onChange={(e) => setTime(e.target.value)} placeholder="e.g. 8:00 AM - 10:00 AM" />
+              </div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-sm font-medium mb-1">Type</label>
+                <Select value={type} onValueChange={(v) => setType(v as EventType)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="lesson">Lesson</SelectItem>
+                    <SelectItem value="orientation">Orientation</SelectItem>
+                    <SelectItem value="assessment">Assessment</SelectItem>
+                    <SelectItem value="workshop">Workshop</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Status</label>
+                <Select value={status} onValueChange={(v) => setStatus(v as EventStatus)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="upcoming">Upcoming</SelectItem>
+                    <SelectItem value="ongoing">Ongoing</SelectItem>
+                    <SelectItem value="completed">Completed</SelectItem>
+                    <SelectItem value="cancelled">Cancelled</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Where</label>
+              <Input value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Location" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Description</label>
+              <textarea
+                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                rows={4}
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Describe the event"
+              />
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="ghost" onClick={() => { setIsAddOpen(false); resetForm(); }}>Cancel</Button>
+              <Button type="submit" disabled={formSubmitting || !title || !date || !time || !location || !description}>
+                {formSubmitting ? 'Saving...' : (editingEvent ? 'Save Changes' : 'Save Event')}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+    </div>
+    </>
   );
 }

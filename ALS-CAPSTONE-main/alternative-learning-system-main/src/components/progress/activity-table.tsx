@@ -149,13 +149,13 @@ export function ActivityTable({
             <FileText className="h-5 w-5 text-blue-600 dark:text-blue-400" />
             Available Activities Template for {moduleTitle}
           </h4>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 items-stretch">
             {predefinedActivities.map((predefined, index) => (
               <div
                 key={index}
-                className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-gray-700 rounded-lg p-3 hover:border-blue-400 dark:hover:border-blue-500 transition-colors"
+                className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-gray-700 rounded-lg p-3 hover:border-blue-400 dark:hover:border-blue-500 transition-colors h-full flex flex-col"
               >
-                <div className="space-y-2">
+                <div className="flex-1 space-y-2">
                   <div>
                     <h5 className="font-semibold text-gray-900 dark:text-white text-sm mb-1">
                       {predefined.name}
@@ -174,16 +174,16 @@ export function ActivityTable({
                       </p>
                     )}
                   </div>
-                  <Button
+                </div>
+                <Button
                     onClick={() => handleQuickAddFromPredefined(predefined)}
                     size="sm"
                     variant="outline"
-                    className="w-full bg-green-600 dark:bg-green-700 text-white hover:bg-green-500 dark:hover:bg-green-600 border-green-600 dark:border-green-700 hover:border-green-500 dark:hover:border-green-600 cursor-pointer transition-all duration-200 hover:shadow-md text-xs flex items-center justify-center gap-1"
+                    className="mt-2 w-full bg-green-600 dark:bg-green-700 text-white hover:bg-green-500 dark:hover:bg-green-600 border-green-600 dark:border-green-700 hover:border-green-500 dark:hover:border-green-600 cursor-pointer transition-all duration-200 hover:shadow-md text-xs flex items-center justify-center gap-1"
                   >
                     <Plus className="h-3 w-3" />
                     Quick Add
                   </Button>
-                </div>
               </div>
             ))}
           </div>

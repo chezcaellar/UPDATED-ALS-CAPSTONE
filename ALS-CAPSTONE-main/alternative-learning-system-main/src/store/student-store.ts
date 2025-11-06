@@ -195,6 +195,11 @@ export const useStudentStore = create<{
       });
 
       try {
+        // Enforce unique LRN before creating
+        const existing = get().students.data.find(s => s.lrn === studentData.lrn);
+        if (existing) {
+          throw new Error(`LRN ${studentData.lrn} is already used by ${existing.name}. Each LRN must be unique.`);
+        }
         const newStudent = await createStudent(studentData);
 
         set(state => {
@@ -223,6 +228,11 @@ export const useStudentStore = create<{
       });
 
       try {
+        // Enforce unique LRN on update (allow same record)
+        const conflict = get().students.data.find(s => s.lrn === updatedStudent.lrn && s._id !== updatedStudent._id);
+        if (conflict) {
+          throw new Error(`LRN ${updatedStudent.lrn} is already used by ${conflict.name}. Each LRN must be unique.`);
+        }
         const result = await updateStudent(updatedStudent);
 
         set(state => {
