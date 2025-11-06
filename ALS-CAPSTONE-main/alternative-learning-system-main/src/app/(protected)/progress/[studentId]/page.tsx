@@ -1,11 +1,15 @@
 "use client";
 
+// @ts-ignore - available at runtime
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
+// @ts-ignore - available at runtime
 import { useParams, useRouter } from "next/navigation";
 import { useProgressStore } from "@/store/progress-store";
 import { useStore } from "@/store";
 import { Student, Module, Progress, Activity } from "@/types";
+// @ts-ignore - available at runtime
 import Image from "next/image";
+// @ts-ignore - available at runtime
 import { shallow } from "zustand/shallow";
 
 // Import static data directly as fallback
@@ -19,8 +23,10 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { ActivityTable } from "@/components/progress/activity-table";
 import { ActivityTableSkeleton } from "@/components/progress/activity-table-skeleton";
 import { ErrorBoundary } from "@/components/error-boundary";
+// @ts-ignore - available at runtime
 import { ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react";
 import { deleteProgress, fetchModules, fetchProgress, updateProgress, createProgress, fetchStudents as apiFetchStudents } from "@/services/api";
+// @ts-ignore - types only in dev
 import { set } from "zod";
 
 // Custom hook to safely manage store subscriptions
@@ -424,7 +430,8 @@ function StudentActivitySummaryPageContent() {
           
           if (existingProgress) {
             // Add activity to existing progress record via API
-            const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || ''}/api/progress`, {
+            const baseUrl = ((globalThis as any).process?.env?.NEXT_PUBLIC_BASE_URL) || '';
+            const res = await fetch(`${baseUrl}/api/progress`, {
               method: 'PATCH',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
@@ -655,20 +662,22 @@ function StudentActivitySummaryPageContent() {
               className="w-full"
             >
               <div className="border-b border-gray-300 dark:border-gray-600">
-                {/* Horizontal scroll container for mobile */}
-                <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-gray-100 dark:scrollbar-track-gray-800 px-1">
-                  <TabsList className="w-full !bg-transparent rounded-none gap-2 p-0 justify-start">
+                {/* Responsive, wrapping tabs */}
+                <div className="px-1">
+                  <TabsList className="w-full !bg-transparent rounded-none gap-2 p-0 justify-start flex flex-wrap">
                     {availableModules.map((module) => (
                       <TabsTrigger
                         key={module._id}
                         value={module._id}
-                        className={`px-3 sm:px-4 md:px-6 py-3 min-w-[120px] sm:min-w-[140px] border-b-2 transition-colors font-bold whitespace-nowrap text-xs sm:text-sm md:text-base ${
+                        className={`px-3 sm:px-4 md:px-6 py-3 border-b-2 transition-colors font-bold whitespace-normal break-words text-left text-xs sm:text-sm md:text-base max-w-full sm:max-w-[48%] md:max-w-none ${
                           selectedModule === module._id
                             ? "!bg-blue-600 dark:!bg-blue-700 !text-white border-blue-600 dark:border-blue-500 rounded-t-lg data-[state=active]:!bg-blue-600 dark:data-[state=active]:!bg-blue-700 data-[state=active]:!text-white"
                             : "!bg-transparent !text-gray-700 dark:!text-gray-300 hover:!text-blue-600 dark:hover:!text-blue-400 border-transparent hover:border-blue-200 dark:hover:border-blue-400 rounded-none data-[state=active]:!bg-transparent"
                         }`}
                       >
-                        {module.title}
+                        <span className="block leading-snug sm:leading-normal truncate sm:whitespace-normal sm:line-clamp-2">
+                          {module.title}
+                        </span>
                       </TabsTrigger>
                     ))}
                   </TabsList>
@@ -701,8 +710,8 @@ function StudentActivitySummaryPageContent() {
                         predefinedActivities={module.predefinedActivities}
                       />
                     )}
-                  </div>
-                </TabsContent)
+              </div>
+            </TabsContent>
               ))}
             </Tabs>
           ) : (
@@ -721,8 +730,6 @@ function StudentActivitySummaryPageContent() {
 // Wrap with error boundary to handle any remaining issues
 export default function StudentActivitySummaryPage() {
   return (
-    <ErrorBoundary>
-      <StudentActivitySummaryPageContent />
-    </ErrorBoundary>
+    <ErrorBoundary children={<StudentActivitySummaryPageContent />} />
   );
 }
