@@ -154,8 +154,13 @@ export function SchoolCalendar() {
   };
 
   // Prefill date when user clicks a day
-  const handleDayClick = (dateString: string) => {
+  const handleDayClick = (dateString: string, e?: any) => {
     if (!dateString) return;
+    // Position tooltip based on clicked cell
+    if (e && e.currentTarget) {
+      const rect = e.currentTarget.getBoundingClientRect();
+      setTooltipPosition({ x: rect.left + rect.width / 2, y: rect.top - 10 });
+    }
     setHoveredDate(dateString);
     setPendingDate(null);
     setIsDatePinned(true);
@@ -464,7 +469,7 @@ export function SchoolCalendar() {
                 `}
                 onMouseEnter={(e) => dayData.isCurrentMonth && handleMouseEnter(dateString, e)}
                 onMouseLeave={handleMouseLeave}
-                onClick={() => dayData.isCurrentMonth && handleDayClick(dateString)}
+                onClick={(e) => dayData.isCurrentMonth && handleDayClick(dateString, e)}
               >
                 <span>{dayData.day}</span>
                 {hasEvents && dayData.isCurrentMonth && (
@@ -677,7 +682,7 @@ export function SchoolCalendar() {
             <DialogFooter>
               <Button type="button" variant="ghost" onClick={() => { setIsAddOpen(false); resetForm(); }}>Cancel</Button>
               <Button type="submit" disabled={formSubmitting || !title || !date || !time || !location || !description}>
-                {formSubmitting ? 'Saving...' : (editingEvent ? 'Save Changes' : 'Save Event')}
+                {formSubmitting ? 'Saving...' : (editingEvent ? 'Update' : 'Save Event')}
               </Button>
             </DialogFooter>
           </form>
